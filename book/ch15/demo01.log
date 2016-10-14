@@ -1,0 +1,29 @@
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Fri Jul 2 12:07:47 2010
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   demo01.ctl
+Data File:      demo01.ctl
+  Bad File:     demo01.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 0
+Errors allowed: 50
+Bind array:     64 rows, maximum of 256000 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table DEPT, loaded from every logical record.
+Insert option in effect for this table: INSERT
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+DEPTNO                              FIRST     *   ,       CHARACTER            
+DNAME                                NEXT     *   ,       CHARACTER            
+LOC                                  NEXT     *   ,       CHARACTER            
+
+SQL*Loader-601: For INSERT option, table must be empty.  Error on table DEPT

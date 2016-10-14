@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <assert.h>
+
+static char * 	USERID = "/";
+
+#define SQLCA_INIT
+EXEC SQL INCLUDE sqlca;
+
+static void process_parms( argc, argv )
+int	argc;
+char *	argv[];
+{
+int	i;
+
+	for( i = 1; i < argc; i++ )
+	{
+		if ( !strncmp( argv[i], "userid=", 7 ) ) USERID = argv[i]+7;
+		else
+		{
+			printf( "usage: %s userid=xxx/xxx\n", argv[0] );
+			exit(1);
+		}
+	}
+	if ( USERID == NULL ) 
+	{
+		printf( "usage: %s userid=xxx/xxx\n", argv[0] );
+		exit(1);
+	}
+}
+
+static void sqlerror_hard()
+{
+    EXEC SQL WHENEVER SQLERROR CONTINUE;
+
+    printf("\nORACLE error detected:");
+    printf("\n% .70s \n", sqlca.sqlerrm.sqlerrmc);
+
+    EXEC SQL ROLLBACK WORK RELEASE;
+    exit(1);
+}
+
+static void process()
+{
+exec sql begin declare section;
+varchar	owner[30];               
+short owner_i;
+varchar	object_name[30];         
+short object_name_i;
+varchar	subobject_name[30];         
+short subobject_name_i;
+varchar	object_id[30];         
+short object_id_i;
+varchar	data_object_id[30];         
+short data_object_id_i;
+varchar	object_type[30];         
+short object_type_i;
+varchar	created[30];         
+short created_i;
+varchar	last_ddl_time[30];         
+short last_ddl_time_i;
+varchar	timestamp[30];         
+short timestamp_i;
+varchar	status[30];         
+short status_i;
+varchar	temporary[30];         
+short temporary_i;
+varchar	generated[30];         
+short generated_i;
+varchar	secondary[30];         
+short secondary_i;
+varchar namespace[30];
+short   namespace_i;
+varchar edition_name[30];
+short   edition_name_i;
+int   cnt = 0;
+int   i;
+exec sql end declare section;
+
+
+	EXEC SQL WHENEVER SQLERROR DO sqlerror_hard();
+
+    exec sql declare c cursor for select 
+          OWNER, OBJECT_NAME, SUBOBJECT_NAME,
+          OBJECT_ID, DATA_OBJECT_ID, OBJECT_TYPE, CREATED,
+          LAST_DDL_TIME, TIMESTAMP, STATUS, TEMPORARY,
+          GENERATED, SECONDARY, NAMESPACE, EDITION_NAME
+	 from all_objects;
+    exec sql open c;
+    exec sql whenever notfound do break;
+    for(;;)
+    {
+        exec sql
+        fetch c into :owner:owner_i,
+        :object_name:object_name_i, :subobject_name:subobject_name_i,
+        :object_id:object_id_i, :data_object_id:data_object_id_i,
+        :object_type:object_type_i, :created:created_i,
+        :last_ddl_time:last_ddl_time_i, :timestamp:timestamp_i,
+        :status:status_i, :temporary:temporary_i,
+        :generated:generated_i, :secondary:secondary_i,
+		:namespace:namespace_i, :edition_name:edition_name_i;
+
+        exec sql
+        insert into t
+        ( id, OWNER, OBJECT_NAME, SUBOBJECT_NAME,
+          OBJECT_ID, DATA_OBJECT_ID, OBJECT_TYPE, CREATED,
+          LAST_DDL_TIME, TIMESTAMP, STATUS, TEMPORARY,
+          GENERATED, SECONDARY, NAMESPACE, EDITION_NAME )
+        values
+        ( s.nextval, :owner:owner_i, :object_name:object_name_i,
+          :subobject_name:subobject_name_i, :object_id:object_id_i,
+          :data_object_id:data_object_id_i, :object_type:object_type_i,
+          :created:created_i, :last_ddl_time:last_ddl_time_i,
+          :timestamp:timestamp_i, :status:status_i,
+          :temporary:temporary_i, :generated:generated_i,
+          :secondary:secondary_i, :namespace:namespace_i,
+		  :edition_name:edition_name_i );
+        if ( (++cnt%100) == 0 )
+        {
+            exec sql commit;
+        }
+    }
+    exec sql whenever notfound continue;
+    exec sql commit;
+    exec sql close c;
+}
+
+main( argc, argv )
+int	argc;
+char *	argv[];
+{
+EXEC SQL BEGIN DECLARE SECTION;
+VARCHAR   oracleid[50];
+EXEC SQL END DECLARE SECTION;
+
+	process_parms( argc, argv );
+
+	/* Connect to ORACLE. */
+	strcpy( oracleid.arr, USERID );
+	oracleid.len = strlen(oracleid.arr);
+
+	EXEC SQL WHENEVER SQLERROR DO sqlerror_hard();
+
+	EXEC SQL CONNECT :oracleid;
+	printf("\nConnected to ORACLE as user: %s\n\n", oracleid.arr);
+
+	process(); 
+
+	/* Disconnect from ORACLE. */
+	EXEC SQL COMMIT WORK RELEASE;
+	exit(0);
+}

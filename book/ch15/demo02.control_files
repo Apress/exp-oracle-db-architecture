@@ -1,0 +1,242 @@
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY WHITESPACE
+(DEPTNO, DNAME, LOC)
+BEGINDATA
+10 Sales Virginia
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY x'09'
+(DEPTNO, dummy1 filler, DNAME, dummy2 filler, LOC)
+BEGINDATA
+10      Sales       Virginia
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+( DEPTNO position(1:2),
+  DNAME  position(3:16),
+  LOC    position(17:29)
+)
+BEGINDATA
+10Accounting    Virginia,USA
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+( DEPTNO      position(1:2),
+  DNAME       position(3:16),
+  LOC         position(17:29),
+  ENTIRE_LINE position(1:29)
+)
+BEGINDATA
+10Accounting    Virginia,USA
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+( DEPTNO      position(1:2),
+  DNAME       position(*:16),
+  LOC         position(*:29),
+  ENTIRE_LINE position(1:29)
+)
+BEGINDATA
+10Accounting    Virginia,USA
+
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+( DEPTNO      position(1) char(2),
+  DNAME       position(*) char(14),
+  LOC         position(*) char(13),
+  ENTIRE_LINE position(1) char(29)
+)
+BEGINDATA
+10Accounting    Virginia,USA
+
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+(DEPTNO,
+  DNAME,
+  LOC,
+  LAST_UPDATED date 'dd/mm/yyyy'
+)
+BEGINDATA
+10,Sales,Virginia,1/5/2000
+20,Accounting,Virginia,21/6/1999
+30,Consulting,Virginia,5/1/2000
+40,Finance,Virginia,15/3/2001
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  LAST_UPDATED date 'dd/mm/yyyy'
+)
+BEGINDATA
+10,Sales,Virginia,1/5/2000
+20,Accounting,Virginia,21/6/1999
+30,Consulting,Virginia,5/1/2000
+40,Finance,Virginia,15/3/2001
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  LAST_UPDATED date 'dd/mm/yyyy',
+  ENTIRE_LINE  ":deptno||:dname||:loc||:last_updated"
+)
+BEGINDATA
+10,Sales,Virginia,1/5/2000
+20,Accounting,Virginia,21/6/1999
+30,Consulting,Virginia,5/1/2000
+40,Finance,Virginia,15/3/2001
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  LAST_UPDATED date 'dd/mm/yyyy',
+  ENTIRE_LINE  ":deptno||:dname||:loc||:last_updated"
+)
+BEGINDATA
+10,Sales,Virginia,1/5/2000
+20,Accounting,Virginia,21/6/1999
+30,Consulting,Virginia,5/1/2000
+40,Finance,Virginia,15/3/2001
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  LAST_UPDATED
+"case
+ when length(:last_updated) > 9
+ then to_date(:last_updated,'hh24:mi:ss dd/mm/yyyy')
+ when instr(:last_updated,':') > 0
+ then to_date(:last_updated,'hh24:mi:ss')
+ else to_date(:last_updated,'dd/mm/yyyy')
+ end"
+)
+BEGINDATA
+10,Sales,Virginia,12:03:03 17/10/2005
+20,Accounting,Virginia,02:23:54
+30,Consulting,Virginia,01:24:00 21/10/2005
+40,Finance,Virginia,17/8/2005
+
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  COMMENTS     "replace(:comments,'\\n',chr(10))"
+)
+BEGINDATA
+10,Sales,Virginia,This is the Sales\nOffice in Virginia
+20,Accounting,Virginia,This is the Accounting\nOffice in Virginia
+30,Consulting,Virginia,This is the Consulting\nOffice in Virginia
+40,Finance,Virginia,This is the Finance\nOffice in Virginia
+
+
+
+LOAD DATA
+INFILE demo.dat "fix 80"
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  COMMENTS
+)
+
+
+
+LOAD DATA
+INFILE demo.dat "var 3"
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  COMMENTS
+)
+
+
+
+
+LOAD DATA
+INFILE demo.dat "str X'7C0A'"
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ','
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  COMMENTS
+)
+
+
+
+
+

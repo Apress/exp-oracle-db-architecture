@@ -1,0 +1,60 @@
+LOAD DATA
+INFILE demo.dat "str X'7C0A'"
+INTO TABLE DEPT
+REPLACE
+FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+TRAILING NULLCOLS
+(DEPTNO,
+  DNAME        "upper(:dname)",
+  LOC          "upper(:loc)",
+  COMMENTS     char(1000000)
+)
+
+
+
+LOAD DATA
+INFILE *
+REPLACE
+INTO TABLE LOB_DEMO
+( owner       position(17:25),
+  time_stamp  position(44:55) date "Mon DD HH24:MI",
+  filename    position(57:100),
+  data        LOBFILE(filename) TERMINATED BY EOF
+)
+BEGINDATA
+-rw-r--r--    1 tkyte    tkyte     1220342 Jun 17 15:26 classes12.zip
+-rw-rw-r--    1 tkyte    tkyte          10 Jul 16 16:38 foo.sql
+-rw-rw-r--    1 tkyte    tkyte         751 Jul 16 16:36 t.ctl
+-rw-rw-r--    1 tkyte    tkyte         491 Jul 16 16:38 testa.sql
+-rw-rw-r--    1 tkyte    tkyte         283 Jul 16 16:38 testb.sql
+-rw-rw-r--    1 tkyte    tkyte         231 Jul 16 16:38 test.sh
+-rw-rw-r--    1 tkyte    tkyte         235 Apr 28 18:03 test.sql
+-rw-rw-r--    1 tkyte    tkyte        1649 Jul 16 16:36 t.log
+-rw-rw-r--    1 tkyte    tkyte        1292 Jul 16 16:38 uselast.sql
+-rw-rw-r--    1 tkyte    tkyte         909 Jul 16 16:38 userbs.sql
+
+
+
+LOAD DATA
+INFILE *
+INTO TABLE image_load
+REPLACE
+FIELDS TERMINATED BY ','
+( ID,
+  NAME,
+  file_name FILLER,
+  IMAGE column object
+  (
+    SOURCE column object
+    (
+      LOCALDATA LOBFILE (file_name) TERMINATED BY EOF
+                NULLIF file_name = 'NONE'
+    )
+  )
+)
+BEGINDATA
+1,icons,icons.gif
+
+
+
+
